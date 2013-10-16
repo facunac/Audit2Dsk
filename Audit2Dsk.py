@@ -1,19 +1,48 @@
 #!/usr/bin/python
 
-import MySQLdb as mdb
+import sys
+from datetime import datetime
+import MySQLdb
+import pickle
+from optparse import OptionParser
 
-con = mdb.connect('localhost', 'testuser', 'test623', 'testdb')
+parser = OptionParser()
+parser.add_option("-u", "--user", dest="pDBuser", help="Usuario base de datos", default="autentia")
+parser.add_option("-p", "--password", dest="pDBpass", help="Password base de datos", default="")
+parser.add_option("-s", "--server", dest="pDBhost", help="Host base de datos", default="base.autentia.cl")
+parser.add_option("-d", "--database", dest="pDBname", help="Nombre base de datos", default="autentia")
+parser.add_option("-c", "--cantidad", dest="pDBcant", help="Cantidad de registros", default=100,type="int")
+parser.add_option("-z", "--home", dest="pPath", help="Carpeta donde dejara los archivos", default="/home/PKL", type = "string")
 
-with con:
+(options, args) = parser.parse_args()
 
-    cur = con.cursor()
-    cur.execute("SELECT * FROM Writers LIMIT 5")
+if not options.pDBpass:
+	parser.error('la password de la base de datos es obligatoria. (-p|--password)')
 
-    rows = cur.fetchall()
+pHome = options.pPath
+if pHome[-1] != "/":
+	pHome += "/"
 
-    desc = cur.description
+db = MySQLdb.connect(options.pDBhost, options.pDBuser, options.pDBpass, options.pDBname)
 
-    print "%s %3s" % (desc[0][0], desc[1][0])
+cursor = db.cursor()
 
-    for row in rows:    
-        print "%2s %3s" % row
+sql = "select * from TAudit where server <> 'AMASONS3' order by registrado limit %d" % (options.pDBcant)
+try:
+	cursor.execute(sql)
+	results = cursor.fetchall()
+	for row in results:
+		nAudit = ""
+		nAudit = row[0]
+		dRegistrado = row[2]
+		print str(dRegistrado)
+		pPath = pHome + nAudit[0:4] + "/" + str(dRegistrado)[0:4] + "/" + str(dRegistrado)[5:7] + "/" + str(dRegistrado)[8:10] + "/" + row[0] + ".pkl"
+		print pPath
+		output = open('data.pkl', 'wb')
+		pickle.dump(row, output)
+		output.close()
+except:
+	print "Error: unable to fecth data"
+
+# disconnect from server
+db.close()
