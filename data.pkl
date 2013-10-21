@@ -1,0 +1,16 @@
+(S'VIZC-T26G-DM1W-UGD6'
+p0
+S's3://autentia-audit/VIZC/2010/12/VIZC-T26G-DM1W-UGD6.pckl'
+p1
+cdatetime
+datetime
+p2
+(S"\x07\xda\x0c\x01\n')\x00\x00\x00"
+p3
+tp4
+Rp5
+S'AMAZONS3'
+p6
+NNL14L
+NNtp7
+.
